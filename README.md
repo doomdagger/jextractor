@@ -46,9 +46,12 @@ $("input[name=password][class=input-control]", htmlContent);
 ```
 
 >you can even use extra symbols.
-> `^` attribute starts with the given string
-> `*` attribute contains the given string
-> `$` attribute ends with the given string
+
+> `^`: attribute starts with the given string.
+
+> `*`: attribute contains the given string.
+
+> `$`: attribute ends with the given string.
 
 ```java
 $("input[name$=password][class^=input-control]", htmlContent);
