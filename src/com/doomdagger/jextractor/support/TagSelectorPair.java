@@ -1,10 +1,22 @@
 package com.doomdagger.jextractor.support;
 
-
+/**
+ * 封装了标签选择器的附加筛选条件
+ * @author Li He
+ *
+ */
 public class TagSelectorPair {
-	
+	/**
+	 * 属性key为...
+	 */
 	private String key;
+	/**
+	 * 属性value为...
+	 */
 	private String value;
+	/**
+	 * 属性附加筛选条件为...
+	 */
 	private String extra;
 	public String getKey() {
 		return key;

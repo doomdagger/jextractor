@@ -1,6 +1,10 @@
 package com.doomdagger.jextractor.support;
 
-
+/**
+ * 封装一个html的标签对象
+ * @author apple
+ *
+ */
 public class Tag {
 	
 	private String tag;

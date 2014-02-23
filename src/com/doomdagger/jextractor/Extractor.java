@@ -21,12 +21,25 @@ public class Extractor {
 	public static final String CLASS_SELECTOR = ".";
 	public static final String ID_SELECTOR = "#";
 	
-	//这个pattern是用来匹配一个标签的各种属性与值的对
+	/**
+	 * 这个pattern是用来匹配一个标签的各种属性与值的对
+	 */
 	private static Pattern propertyPattern = Pattern.compile("(\\w+-?)+=(\\\"(.*?)\\\"|(/?\\w+-?/?\\.?)+)",Pattern.MULTILINE);
-	//这个pattern是用来匹配全部的html标签和转义字符（&开头的），以便将他们删去
+	/**
+	 * 这个pattern是用来匹配全部的html标签和转义字符（&开头的），以便将他们删去
+	 */
 	private static Pattern removeTagPattern = Pattern.compile("(<[^<>]*?>|&\\w+?;)",Pattern.MULTILINE);
-	
+	/**
+	 * 这个pattern用来查找全部的html tag，包括结束的tag
+	 */
 	private static Pattern allTagFindPattern = Pattern.compile("<(/)?(\\b\\w+)[^<>]*?>",Pattern.MULTILINE);
+	
+	/**
+	 * 方法主入口，接受两个String，第一个是选择器，第二个是html的内容
+	 * @param selector
+	 * @param content
+	 * @return
+	 */
 	public static List<DomElement> $(String selector, String content){
 		
 		//System.out.println(content);
@@ -35,6 +48,7 @@ public class Extractor {
 		if(selectors.length==1){//单一的选择器模式
 			return singleSelector(selectors[0], content);
 		}else if(selectors.length==2){//子孙选择器模式，儿子，孙子，全有
+			//先找出第一个选择器所满足的dom元素
 			List<DomElement> domElements = singleSelector(selectors[0], content);
 			List<DomElement> domElements2 = new ArrayList<DomElement>();
 			for(DomElement domElement : domElements){
@@ -63,6 +77,12 @@ public class Extractor {
 		return null;
 	}
 	
+	/**
+	 * 单一选择器进行dom元素提取
+	 * @param selector 选择器字符串
+	 * @param content html文本
+	 * @return
+	 */
 	private static List<DomElement> singleSelector(String selector, String content){
 		List<DomElement> domElements = null;
 		String filterString = null;
@@ -73,7 +93,7 @@ public class Extractor {
 			//System.out.println(filterString);
 		}
 		
-		
+		//创建筛选器
 		Filter filter = createFilter(filterString);
 		
 		
@@ -83,6 +103,9 @@ public class Extractor {
 			//class选择器
 			String className = selector.substring(1);
 			//<([a-z|A-Z]+)[^>]*class=(\"(.*?\s+)?title(\s+.*?)?\"|title)[^>]*>
+			/**
+			 * 选择具有相应class的dom元素
+			 */
 			String regexPattern = "<([a-z|A-Z]+)[^>]*class=(\\\"((.*?\\s+)?"+className+"(\\s+.*?)?)\\\"|"+className+")[^>]*?>";
 			Pattern tagPattern  = Pattern.compile(regexPattern, Pattern.MULTILINE);
 			
@@ -94,7 +117,8 @@ public class Extractor {
 //			        System.out.println();
 //			    }
 //			}
-						
+			
+			//传入matcher与content
 			domElements = packDomElement(matcher, content);
 			
 		}else if(selector.startsWith(ID_SELECTOR)){
@@ -107,13 +131,16 @@ public class Extractor {
 			domElements = packDomElement(matcher, content);
 
 		}else {
-			//标签选择器
+			//标签选择器，小复杂。。。
 			
 			//将选择器字符串拆分
 			String[] parts = selector.split("\\[|\\]");
 			String selectorTagName = parts[0];
 			List<TagSelectorPair> listPairs = new ArrayList<TagSelectorPair>();
 			
+			/**
+			 * 获得标签筛选器附加条件对象的集合
+			 */
 			if(parts.length>1){
 				//这个pattern用来分析每一个选择器的键值对
 				Pattern selectorPairPattern = Pattern.compile("((\\w+-?)+)([$^*]?)=[\"|']?([^\"']*)[\"|']?"); 
@@ -144,6 +171,7 @@ public class Extractor {
 			Matcher matcher = tagPattern.matcher(content);
 			int sequenceIndex = 0;
 			while(matcher.find(sequenceIndex)){
+				//tag的字符串
 				String selectedTag = matcher.group(0);
 				//System.out.println(selectedTag);
 				//不满足选择器列出的属性键值对的话，扫描下一个此标签元素
@@ -184,7 +212,12 @@ public class Extractor {
 		}
 	}
 	
-	//打包，适合第一个class查询与第二个id查询，注意！不完全适合第三种查询
+	/**
+	 * 打包，适合第一个class查询与第二个id查询，注意！不完全适合第三种查询
+	 * @param matcher
+	 * @param content
+	 * @return
+	 */
 	private static List<DomElement> packDomElement(Matcher matcher, String content){
 		List<DomElement> domElements = new ArrayList<DomElement>();
 
