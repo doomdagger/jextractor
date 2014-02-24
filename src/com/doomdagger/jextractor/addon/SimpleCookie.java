@@ -4,6 +4,11 @@ import java.util.Date;
 
 import org.apache.http.cookie.Cookie;
 
+/**
+ * Simple Cookie implementation
+ * @author Li He
+ *
+ */
 public class SimpleCookie implements Cookie{
 	private String name;
 	private String value;

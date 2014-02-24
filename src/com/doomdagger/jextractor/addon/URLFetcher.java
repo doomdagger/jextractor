@@ -7,20 +7,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-//请使用IP地址，节约DNS查询时间
+/**
+ * 请使用IP地址，节约DNS查询时间
+ * use IP address, DNS lookup is time-costing.
+ * @author Li He
+ *
+ */
 public class URLFetcher {	
 		
 	public static FetchResponse fetchURLByGet(String url, String sessionId){
 		//System.err.println("GET in session:"+sessionId);
 		
-		
 		FetchResponse fetchResponse = new FetchResponse();
-		
 		
 		url = repairURL(url);
 		
 		//创建sdk对象
-		
 		JExtractorFetchUrl fetch= new JExtractorFetchUrl();
 		//打开允许重定向开关,默认
 		fetch.setAllowRedirect(false);
@@ -108,7 +110,7 @@ public class URLFetcher {
 	
 	public static void main(String[] args){
 		long currentTime = System.currentTimeMillis();
-		FetchResponse response = fetchURLByPost("202.199.128.21/academic/j_acegi_security_check", null, MapMaker.instance("j_username", "1018110323").param("j_password", "lh911119").toMap());
+		FetchResponse response = fetchURLByPost("202.199.128.21/academic/j_acegi_security_check", null, MapMaker.instance("j_username", "fake_username").param("j_password", "fake_passowrd").toMap());
 		System.err.println((System.currentTimeMillis()-currentTime)/(double)1000+"s");
 		currentTime = System.currentTimeMillis();
 		FetchResponse response2 = fetchURLByGet("202.199.128.21/academic/showHeader.do", response.getSessionId());

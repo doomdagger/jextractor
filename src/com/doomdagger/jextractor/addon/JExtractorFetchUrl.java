@@ -34,6 +34,13 @@ import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
+/**
+ * The real executor of fetching url page.
+ * The usage tips of this class is listed in URLFetcher class.
+ * You can use this class as your url page fetcher or use the furthermore encapsulated class URLFetcher
+ * @author Li He
+ *
+ */
 public class JExtractorFetchUrl {
 	private DefaultHttpClient httpClient;
 	//request part below
@@ -158,18 +165,31 @@ public class JExtractorFetchUrl {
 		this.url = url;
 	}
 
+	
+	/**
+	 * execute GET method
+	 * @return
+	 */
 	public String get(){
 		return get(url);
 	}
-	
+	/**
+	 * execute GET method
+	 * @param url 
+	 * @return
+	 */
 	public String get(String url){
 		this.url = url;
 		httpGet = new HttpGet();
-		httpGet.setURI(composeURI());
-		httpGet.setHeader("Cookie",composeCookieHeader());
 		
-		return connect(httpGet);
-		
+		try {
+			httpGet.setURI(composeURI());
+			httpGet.setHeader("Cookie",composeCookieHeader());
+			return connect(httpGet);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}		
 	}
 	
 	public String post(){
@@ -181,17 +201,21 @@ public class JExtractorFetchUrl {
 		httpPost = new HttpPost();
 		try {
 			httpPost.setURI(new URI(url));
+			httpPost.setEntity(composeEntity());
+			httpPost.setHeader("Cookie",composeCookieHeader());
+			return connect(httpPost);
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
+			return null;
 		}
-		httpPost.setEntity(composeEntity());
-		httpPost.setHeader("Cookie",composeCookieHeader());
-
-		return connect(httpPost);
 	}
 	
-	
-	private URI composeURI(){
+	/**
+	 * compose uri from the given url and post datas
+	 * @return
+	 * @throws URISyntaxException
+	 */
+	private URI composeURI() throws URISyntaxException{
 		StringBuilder builder = new StringBuilder(url);
 		if(postData!=null&&postData.size()!=0){
 			builder.append("?");
@@ -199,15 +223,15 @@ public class JExtractorFetchUrl {
 				builder.append(entry.getKey()+"="+entry.getValue()+"&");
 			}
 		}
-		try {
-			URI uri = new URI(builder.toString());
-			return uri;
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			return null;
-		}
+		
+		URI uri = new URI(builder.toString());
+		return uri;		
 	}
 	
+	/**
+	 * compose POST Entity
+	 * @return
+	 */
 	private HttpEntity composeEntity(){
 		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
 		if(postData!=null&&postData.size()!=0){
@@ -226,6 +250,10 @@ public class JExtractorFetchUrl {
 		
 	}
 	
+	/**
+	 * cookie header
+	 * @return
+	 */
 	public String composeCookieHeader(){
 		if(setCookies!=null&&setCookies.size()!=0){
 			StringBuilder builder = new StringBuilder();
@@ -240,26 +268,37 @@ public class JExtractorFetchUrl {
 		return null;
 	}
 	
+	/**
+	 * execute the real connect action
+	 * @param httpRequest
+	 * @return
+	 */
 	public String connect(HttpUriRequest httpRequest){
 		BufferedReader reader = null;
 		try {
 			httpClient = new DefaultHttpClient();
-			HttpParams params = httpClient.getParams();  
+			HttpParams params = httpClient.getParams(); 
+			//allow auto redirect
 			params.setParameter(ClientPNames.HANDLE_REDIRECTS, allowRedirect);
+			//set max redirect count
 			params.setParameter(ClientPNames.MAX_REDIRECTS, redirectNum);
 			httpClient.setParams(params);
+			
 			HttpResponse response = httpClient.execute(httpRequest);
+			//set-cookie header
 			Header cookieHeader = response.getFirstHeader("Set-Cookie");
 			responseCookies = (cookieHeader==null)?"":cookieHeader.getValue();
+			
 			statusCode = response.getStatusLine().getStatusCode();
+			//set headers
 			HeaderIterator iter = response.headerIterator();
 			responseHeaders = new HashMap<String,String>();
 			while(iter.hasNext()){
 				Header header = iter.nextHeader();
 				responseHeaders.put(header.getName(), header.getValue());
 			}
-			
-			//处理编码
+						
+			//处理编码 handle encoding
 			InputStream inputStream = response.getEntity().getContent();
 			Header typeHeader = response.getEntity().getContentType();
 			Header encodingHeader = response.getEntity().getContentEncoding();
@@ -312,6 +351,9 @@ public class JExtractorFetchUrl {
 		url = "";
 	}
 	
+	/**
+	 * unused codes below
+	 */
 	private boolean found = false;
     private String result;
 	
@@ -383,7 +425,10 @@ public class JExtractorFetchUrl {
     }
 
 	
-	
+	/**
+	 * main method test
+	 * @param args
+	 */
 	public static void main(String[] args){
 		JExtractorFetchUrl fetch = new JExtractorFetchUrl();
 		System.err.println(fetch.get("http://www.taobao.com"));
